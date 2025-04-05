@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GhostVillages.Migrations
 {
     [DbContext(typeof(GhostVillagesDbContext))]
-    [Migration("20250405102946_Init")]
+    [Migration("20250405122521_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -69,6 +69,9 @@ namespace GhostVillages.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });

@@ -1,4 +1,5 @@
-﻿using GhostVillages.DataAccess.Entities;
+﻿using GhostVillages.DataAccess.Configurations;
+using GhostVillages.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -19,5 +20,14 @@ namespace GhostVillages.DataAccess
         public DbSet<VillageEntity> Villages { get; set; }
 
         public DbSet<RegionEntity> Regions { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new VillageConfiguration());
+            modelBuilder.ApplyConfiguration(new RegionConfiguration());
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

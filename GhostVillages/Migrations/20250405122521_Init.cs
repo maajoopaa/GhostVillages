@@ -61,6 +61,12 @@ namespace GhostVillages.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Villages_RegionId",
                 table: "Villages",
                 column: "RegionId");
