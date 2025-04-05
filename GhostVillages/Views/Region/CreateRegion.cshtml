@@ -1,37 +1,53 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Создане области</title>
+    <title>Создание области</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
-            background-color: #f0f2f5;
+            background-color: #f8f9fa;
             padding-top: 50px;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .form-container {
             background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            max-width: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            max-width: 650px;
             margin: auto;
         }
 
+        h3 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #34495e;
+        }
+
         .form-control {
-            border-radius: 10px;
-            box-shadow: none;
+            border-radius: 12px;
+            border: 1px solid #ced4da;
+            padding: 10px 14px;
         }
 
         .btn-custom {
-            border-radius: 10px;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 500;
         }
 
         .back-button {
-            margin-top: 15px;
-            font-size: 1.2rem;
+            font-size: 1rem;
         }
 
         .toast-notification {
@@ -40,15 +56,14 @@
             right: 20px;
             z-index: 1100;
             min-width: 300px;
-            animation: slideIn 0.5s forwards;
-        }
-
-        .toast-error {
-            border-left: 5px solid #dc3545;
         }
 
         .toast-success {
             border-left: 5px solid #28a745;
+        }
+
+        .toast-error {
+            border-left: 5px solid #dc3545;
         }
     </style>
 </head>
@@ -57,7 +72,7 @@
     <div id="notificationContainer" class="toast-notification"></div>
 
     <div class="form-container">
-        <h3 class="text-center mb-4">Создать новую область</h3>
+        <h3>Создать новую область</h3>
         <form id="createRegionForm">
             <div class="mb-3">
                 <label for="name" class="form-label">Название области</label>
@@ -74,9 +89,9 @@
                 <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-primary btn-custom">Создать</button>
-                <a href="@Url.Action("Index","Home")" class="btn btn-secondary btn-custom back-button">Назад</a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary btn-custom back-button">Назад</a>
             </div>
         </form>
     </div>
@@ -108,9 +123,7 @@
                 toastEl.remove();
             });
 
-            setTimeout(() => {
-                toast.hide();
-            }, 5000);
+            setTimeout(() => toast.hide(), 5000);
         }
 
         function convertToBase64(file) {
@@ -137,7 +150,6 @@
 
             try {
                 const imageBase64 = await convertToBase64(imageFile);
-
                 const regionData = {
                     title: name,
                     description: description,
@@ -154,7 +166,9 @@
 
                 if (response.ok) {
                     showNotification("Область успешно создана!");
-                    window.location.href = '@Url.Action("Index", "Home")';
+                    setTimeout(() => {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    }, 1000);
                 } else {
                     showNotification("Произошла ошибка при создании области. Попробуйте снова.", false);
                 }
