@@ -1,3 +1,4 @@
+using GhostVillages.Application.Services;
 using GhostVillages.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -7,21 +8,30 @@ namespace GhostVillages.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IRegionService _regionService;
+        private readonly IVillageService _villageService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IRegionService regionService, IVillageService villageService)
         {
             _logger = logger;
+            _regionService = regionService;
+            _villageService = villageService;
         }
 
-        public IActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View();
+            var regions = await _regionService.GetList();
+
+            return View(regions);
         }
 
-        public IActionResult Privacy()
+        public async Task<ActionResult> Search(string query)
         {
-            return View();
+            var villages = await _villageService.Search(query);
+
+            return View(villages);
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
