@@ -5,17 +5,61 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Области</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #f8f9fa;
+            box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.05), -4px -4px 12px rgba(255, 255, 255, 0.7);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.08);
+            }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        a.text-decoration-none:hover .card-title {
+            text-decoration: underline;
+        }
+
+        .container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #343a40;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="container mt-5">
+    <div class="container">
+        <h2>Список регионов</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4">
             @foreach (var region in Model)
             {
                 <div class="col">
                     <a href="@Url.Action("GetRegion", "Region", new { id = region.Id })" class="text-decoration-none">
-                        <div class="card">
+                        <div class="card h-100">
                             @if (region.Image != null)
                             {
                                 var base64Image = Convert.ToBase64String(region.Image);
@@ -23,7 +67,7 @@
                             }
                             else
                             {
-                                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Изображение области">
+                                <img src="https://via.placeholder.com/300x200?text=Нет+изображения" class="card-img-top" alt="Нет изображения">
                             }
                             <div class="card-body">
                                 <h5 class="card-title text-truncate" title="@region.Title">@region.Title</h5>
@@ -36,6 +80,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
