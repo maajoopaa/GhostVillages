@@ -1,4 +1,4 @@
-﻿@model ICollection<GhostVillages.DataAccess.Entities.RegionEntity>
+﻿@model ICollection<GhostVillages.DataAccess.Entities.VillageEntity>
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -8,25 +8,25 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
-
+    <h1>Результаты поиска</h1>
     <div class="container mt-5">
         <div class="row row-cols-1 row-cols-md-3 g-4">
-            @foreach (var region in Model)
+            @foreach (var village in Model)
             {
                 <div class="col">
-                    <a href="@Url.Action("GetRegion", "Region", new { id = region.Id })" class="text-decoration-none">
+                    <a href="@Url.Action("GetVillage", "Village", new { id = village.Id })" class="text-decoration-none">
                         <div class="card">
-                            @if (region.Image != null)
+                            @if (village.Image != null)
                             {
-                                var base64Image = Convert.ToBase64String(region.Image);
-                                <img src="data:image/jpeg;base64,@base64Image" class="card-img-top" alt="Изображение области">
+                                var base64Image = Convert.ToBase64String(village.Image);
+                                <img src="data:image/jpeg;base64,@base64Image" class="card-img-top" alt="Изображение деревни">
                             }
                             else
                             {
-                                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Изображение области">
+                                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Изображение деревни">
                             }
                             <div class="card-body">
-                                <h5 class="card-title text-truncate" title="@region.Title">@region.Title</h5>
+                                <h5 class="card-title text-truncate" title="@village.Title">@village.Title</h5>
                             </div>
                         </div>
                     </a>
