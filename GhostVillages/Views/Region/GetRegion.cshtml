@@ -1,0 +1,199 @@
+﻿@model GhostVillages.DataAccess.Entities.RegionEntity
+@{
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+            animation: slideIn 0.5s forwards;
+        }
+
+        .toast-error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .toast-success {
+            border-left: 5px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div id="notificationContainer" class="toast-notification"></div>
+
+    <div class="container mt-5">
+        <div class="card mb-4">
+            @if (isAdmin)
+            {
+                <form id="regionEditForm">
+                    <div class="row g-3 p-3">
+                        <div class="col-md-4">
+                            @if (Model.Image != null)
+                            {
+                                var base64Image = Convert.ToBase64String(Model.Image);
+                                <img src="data:image/jpeg;base64,@base64Image" class="img-fluid rounded mb-2" id="previewImage" />
+                                <input type="hidden" id="existingImage" value="@base64Image" />
+                            }
+                            <input type="file" class="form-control" id="imageInput" accept="image/*">
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mb-2" id="titleInput" value="@Model.Title" required>
+                            <textarea class="form-control mb-2" id="descriptionInput" rows="5">@Model.Description</textarea>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-danger" id="deleteButton">Удалить</button>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="row g-3 p-3">
+                    <div class="col-md-4">
+                        @if (Model.Image != null)
+                        {
+                            var base64Image = Convert.ToBase64String(Model.Image);
+                            <img src="data:image/jpeg;base64,@base64Image" class="img-fluid rounded" />
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <h3>@Model.Title</h3>
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <h4>Деревни-призраки области</h4>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var village in Model.Villages)
+            {
+                <div class="col">
+                    <a href="@Url.Action("GetVillage", "Village", new { id = village.Id })" class="text-decoration-none">
+                        <div class="card">
+                            @if (village.Image != null)
+                            {
+                                var base64Image = Convert.ToBase64String(village.Image);
+                                <img src="data:image/jpeg;base64,@base64Image" class="card-img-top" alt="Изображение деревни">
+                            }
+                            else
+                            {
+                                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Изображение деревни">
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate" title="@village.Title">@village.Title</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        document.getElementById("deleteButton")?.addEventListener("click", async function () {
+            if (confirm("Вы уверены, что хотите удалить эту область?")) {
+                const response = await fetch('@Url.Action("RemoveRegion", "Region", new { id = Model.Id })', {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification("Область успешно удалена!", true);
+                    setTimeout(() => window.location.href = '@Url.Action("Index", "Home")', 1500);
+                } else {
+                    showNotification("Ошибка при удалении области", false);
+                }
+            }
+        });
+
+        document.getElementById("imageInput")?.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById("previewImage").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("regionEditForm")?.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const title = document.getElementById("titleInput").value;
+            const description = document.getElementById("descriptionInput").value;
+            const imageInput = document.getElementById("imageInput");
+            let imageBase64 = document.getElementById("existingImage")?.value || null;
+
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                imageBase64 = await new Promise((resolve, reject) => {
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            const data = {
+                title: title,
+                description: description,
+                image: imageBase64
+            };
+
+            const response = await fetch('@Url.Action("UpdateRegion", "Region", new { id = Model.Id })', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showNotification("Изменения сохранены успешно!", true);
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showNotification("Ошибка при сохранении изменений", false);
+            }
+        });
+
+        function showNotification(message, isSuccess = true) {
+            const container = document.getElementById('notificationContainer');
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast show ${isSuccess ? 'toast-success' : 'toast-error'}`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.innerHTML = `
+                <div class="toast-header bg-white">
+                    <strong class="me-auto">${isSuccess ? 'Успех' : 'Ошибка'}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+                <div class="toast-body bg-light">
+                    ${message}
+                </div>
+            `;
+            container.appendChild(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            toastEl.addEventListener('hidden.bs.toast', function () {
+                toastEl.remove();
+            });
+
+            setTimeout(() => {
+                toast.hide();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

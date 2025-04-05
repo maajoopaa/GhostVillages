@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Создане области</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding-top: 50px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            box-shadow: none;
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+        }
+
+        .back-button {
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+            animation: slideIn 0.5s forwards;
+        }
+
+        .toast-error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .toast-success {
+            border-left: 5px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="notificationContainer" class="toast-notification"></div>
+
+    <div class="form-container">
+        <h3 class="text-center mb-4">Создать новую область</h3>
+        <form id="createRegionForm">
+            <div class="mb-3">
+                <label for="name" class="form-label">Название области</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Фото области</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание области</label>
+                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary btn-custom">Создать</button>
+                <a href="@Url.Action("Index","Home")" class="btn btn-secondary btn-custom back-button">Назад</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function showNotification(message, isSuccess = true) {
+            const container = document.getElementById('notificationContainer');
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast show ${isSuccess ? 'toast-success' : 'toast-error'}`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.innerHTML = `
+                <div class="toast-header bg-white">
+                    <strong class="me-auto">${isSuccess ? 'Успех' : 'Ошибка'}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>
+                </div>
+                <div class="toast-body bg-light">
+                    ${message}
+                </div>
+            `;
+            container.appendChild(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            toastEl.addEventListener('hidden.bs.toast', function () {
+                toastEl.remove();
+            });
+
+            setTimeout(() => {
+                toast.hide();
+            }, 5000);
+        }
+
+        function convertToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('createRegionForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const imageInput = document.getElementById('image');
+            const imageFile = imageInput.files[0];
+
+            if (!name || !description || !imageFile) {
+                showNotification("Все поля должны быть заполнены!", false);
+                return;
+            }
+
+            try {
+                const imageBase64 = await convertToBase64(imageFile);
+
+                const regionData = {
+                    title: name,
+                    description: description,
+                    image: imageBase64.split(',')[1]
+                };
+
+                const response = await fetch('@Url.Action("CreateRegion", "Region")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(regionData)
+                });
+
+                if (response.ok) {
+                    showNotification("Область успешно создана!");
+                    window.location.href = '@Url.Action("Index", "Home")';
+                } else {
+                    showNotification("Произошла ошибка при создании области. Попробуйте снова.", false);
+                }
+            } catch (error) {
+                console.error(error);
+                showNotification("Произошла ошибка при отправке данных. Попробуйте снова.", false);
+            }
+        });
+    </script>
+
+</body>
+</html>
