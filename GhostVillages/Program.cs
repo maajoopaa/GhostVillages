@@ -1,3 +1,4 @@
+using GhostVillages.Application.Services;
 using GhostVillages.DataAccess;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 
 //services
-
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IVillageService, VillageService>();
+builder.Services.AddTransient<IRegionService, RegionService>();
 
 //db
 var connectionString = builder.Configuration.GetConnectionString("GhostVillagesDbContext");
